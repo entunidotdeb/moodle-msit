@@ -73,6 +73,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
+    'accounts',
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -80,6 +81,7 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "rest_framework",
+    "allauth.socialaccount.providers.google",
 ]
 
 LOCAL_APPS = [
@@ -127,6 +129,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+SITE_ID = 1
 
 # MIDDLEWARE
 # ------------------------------------------------------------------------------
