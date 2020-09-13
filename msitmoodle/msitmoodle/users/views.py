@@ -4,6 +4,8 @@ from django.urls import reverse
 from django.views.generic import DetailView, RedirectView, UpdateView
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
+from django.http import HttpResponse
+import datetime
 
 User = get_user_model()
 
@@ -48,3 +50,14 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+
+def current_datetime(request, username):
+    now = datetime.datetime.now()
+    user = User.objects.get(username=username)
+    html = "<html><body><h1>It is now %s %s.</h1></body></html>" % (now, user.email)
+    return HttpResponse(html)
+
+
+# class UserSettingsView(LoginRequiredMixin, View):
+#     template_name =  ''
