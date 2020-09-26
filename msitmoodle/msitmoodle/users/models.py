@@ -94,6 +94,8 @@ class Student(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE)
     shift = models.SmallIntegerField(choices=SHIFT, verbose_name="Shift")
+    # employeeid = 
+    # is_proctor = #TODO
 
     def __str__(self):
         if self.user.first_name and self.user.last_name:

@@ -82,7 +82,7 @@ PH = 17
 CH = 18
 
 SUBJECTS = (
-    (PE, "Power Engineering"),
+    (PE, "Power Engineering (PE)"),
     (ME, "Mechanical Engineering"),
     (MT, "Mechatronics"),
     (AT, "Mechanical and Automation Engineering"),
