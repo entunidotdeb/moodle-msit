@@ -1,7 +1,13 @@
 {%extends "account/base.html" %}
 
 {% load i18n %}
+{% load static i18n %}
 {% load crispy_forms_tags %}
+
+{% block css %}
+{{block.super}}
+<link rel="stylesheet" href="{% static 'css/signupstyle.css' %}"> 
+{% endblock %}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
@@ -12,6 +18,23 @@
 
 <form class="signup blueForms" id="signup_form" method="post" action="{% url 'account_signup' %}">
   {% csrf_token %}
+  <div class="form-row">
+    <div class="col-md-4">
+      <button class="rounded-pill btn btn-secondary" id="signUp_Teacher">
+        Sign Up As Teacher
+      </button>
+    </div>
+    <div class="col-md-4">
+      <button class="rounded-pill btn btn-primary" id="signUp_Student">
+        Sign Up As Student
+      </button>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="col-md-12">
+      {{ form.profile_type|as_crispy_field}}
+    </div>
+  </div>
   <div class="form-row">
     <div class="form-group col-md-6 mb-0">
       {{ form.email|as_crispy_field }}
@@ -35,11 +58,14 @@
     </div>
   </div>
   <div class="form-row">
-    <div class="form-group col-md-6 mb-0">
+    <div class="form-group col-md-4 mb-0">
       {{ form.enrollnum|as_crispy_field}}
     </div>
-    <div class="form-group col-md-6 mb-0">
-      {{ form.serialnum|as_crispy_field}}
+    <div class="form-group col-md-2 mb-0">
+      {{ form.section|as_crispy_field }}
+    </div>
+    <div class="form-group col-md-4 mb-0">
+      {{ form.serialnum|as_crispy_field }}
     </div>
   </div>
   <div class="form-row">
@@ -50,12 +76,48 @@
       {{ form.shift|as_crispy_field }}
     </div>
   </div>
-  {{form.is_cr|as_crispy_field}}
   {% if redirect_field_value %}
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
   <button class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
 </form>
+<script>
+  const signUp_Teacher = document.getElementById("signUp_Teacher");
+  const signUp_Student = document.getElementById("signUp_Student");
+  const div_id_enrollnum = document.getElementById("div_id_enrollnum");
+  const div_id_serialnum = document.getElementById("div_id_serialnum");
+  const div_id_course = document.getElementById("div_id_course");
+  const div_id_shift = document.getElementById("div_id_shift");
+  const div_id_section = document.getElementById("div_id_section");
+  const student_checkbox = document.getElementById("id_id_profile_type_0_2")
+  const teacher_checkbox = document.getElementById("id_id_profile_type_0_1")
+  const div_radio = document.getElementById("div_id_profile_type")
+  div_radio.style.display = "none";
 
+  signUp_Teacher.addEventListener("click", () => {
+    div_id_enrollnum.style.display = "none";
+    div_id_serialnum.style.display = "none";
+    div_id_course.style.display = "none";
+    div_id_shift.style.display = "none";
+    div_id_section.style.display = "none";
+    signUp_Student.style.border = "50%";
+    signUp_Teacher.className = " rounded-pill btn btn-primary";
+    signUp_Student.className = " rounded-pill btn btn-secondary";
+    teacher_checkbox.checked = true;
+    student_checkbox.checked = false;
+  });
+
+  signUp_Student.addEventListener("click", () => {
+    div_id_enrollnum.style.display = "block";
+    div_id_serialnum.style.display = "block";
+    div_id_course.style.display = "block";
+    div_id_shift.style.display = "block";
+    div_id_section.style.display = "block";
+    signUp_Student.className = "rounded-pill btn btn-primary";
+    signUp_Teacher.className = "rounded-pill btn btn-secondary";
+    teacher_checkbox.checked = false;
+    student_checkbox.checked = true;
+  });
+</script>
 {% endblock %}
 

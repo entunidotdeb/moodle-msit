@@ -122,3 +122,20 @@ SHIFT = (
 )
 
 #End Region
+
+#Region Profile
+
+TEACHER = 1
+PROCTOR = 2
+HOD = 3
+STUDENT = 4
+CR = 5
+
+PROFILE_TYPE = (
+    (TEACHER, "Teacher"),
+    (PROCTOR, "Proctor"),
+    (HOD, "HOD"),
+    (STUDENT, "Student"),
+    (CR, "Class Representative") 
+)
+#End Region

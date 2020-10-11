@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 from allauth.account.forms import SignupForm
 from django import forms
 from msitmoodle.users.models import Subject, Section
-from .user_constants import COURSES, SHIFT, YEAR, SEMESTER
+from .user_constants import COURSES, SHIFT, YEAR, SEMESTER, PROFILE_TYPE
 User = get_user_model()
 
 
@@ -37,14 +37,17 @@ class UserCreationForm(f.UserCreationForm):
 class CustomSignupForm(SignupForm):
     first_name = forms.CharField(max_length=30, label='First Name')
     last_name = forms.CharField(max_length=30, label='Last Name')
-    course = forms.ChoiceField(choices=COURSES, label='Course Enrolled')
-    shift = forms.ChoiceField(choices=SHIFT)
-    enrollnum = forms.IntegerField(label='Enrollment Number')
-    section = forms.ModelChoiceField(queryset=Section.objects.all())
-    currentyear = forms.ChoiceField(choices=YEAR)
-    currentsem = forms.ChoiceField(choices=SEMESTER)
-    serialnum  = forms.IntegerField(label='Class Serial Number')
-    is_cr = forms.BooleanField(help_text="Check only if you are CR", label="CR?")
+    course = forms.ChoiceField(choices=COURSES, label='Course Enrolled', required=False)
+    shift = forms.ChoiceField(choices=SHIFT, required=False)
+    enrollnum = forms.IntegerField(label='Enrollment Number', required=False)
+    section = forms.ModelChoiceField(queryset=Section.objects.all(), required=False)
+    currentyear = forms.ChoiceField(choices=YEAR, required=False)
+    currentsem = forms.ChoiceField(choices=SEMESTER, required=False)
+    serialnum = forms.IntegerField(label='Class S.No.', required=False)
+    profile_type = forms.ChoiceField(
+        choices=PROFILE_TYPE, widget=forms.widgets.RadioSelect, label="Signing up as?"
+    )
+
     def signup(self, request, user):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']

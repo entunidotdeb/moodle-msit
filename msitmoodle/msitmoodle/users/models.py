@@ -2,7 +2,10 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
-from .user_constants import COURSES, YEAR, SEMESTER, SUBJECTS, SUB_TYPE, SHIFT
+from .user_constants import (
+    COURSES, YEAR, SEMESTER, SUBJECTS, SUB_TYPE, SHIFT, 
+    FIRSTYR, FIRSTSEM
+)
 
 class User(AbstractUser):
 
@@ -70,10 +73,10 @@ class Student(models.Model):
         to=Section, on_delete=models.PROTECT, verbose_name="Section"
     )
     currentyear = models.SmallIntegerField(
-        choices=YEAR, verbose_name="Course Year", help_text="Course Year"
+        choices=YEAR, verbose_name="Course Year", help_text="Course Year", default=FIRSTYR
     )
     currentsem = models.SmallIntegerField(
-        choices=SEMESTER, verbose_name="Semester", help_text="Semester"
+        choices=SEMESTER, verbose_name="Semester", help_text="Semester", default=FIRSTSEM
     )
     serialnum = models.SmallIntegerField(
         verbose_name="Class Serial Number", help_text="Class Serial Number"
@@ -94,8 +97,9 @@ class Student(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE)
     shift = models.SmallIntegerField(choices=SHIFT, verbose_name="Shift")
-    # employeeid = 
-    # is_proctor = #TODO
+    emp_id = models.IntegerField(verbose_name="Employee ID") 
+    is_proctor = models.BooleanField(default=False)
+    is_hod = models.BooleanField(default=False)
 
     def __str__(self):
         if self.user.first_name and self.user.last_name:
