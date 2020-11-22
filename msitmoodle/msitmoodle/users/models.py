@@ -29,8 +29,8 @@ class Course(models.Model):
     )
 
     def __str__(self):
-        courseName = self.get_course_name_display()
-        return '%s' % (courseName)
+        course_name = self.get_course_name_display()
+        return '%s' % (course_name)
 
 
 class Section(models.Model):
@@ -111,4 +111,4 @@ class Teacher(models.Model):
         if self.name:
             return '%s' % (self.name)
         
-    
+#TODO  create Batch model

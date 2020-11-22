@@ -57,3 +57,5 @@ ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_FORMS = {
 'signup': 'users.forms.CustomSignupForm',
 }
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_FORMS = {'signup': 'users.forms.SocialCustomSignupForm'}

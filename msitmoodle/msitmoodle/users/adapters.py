@@ -20,7 +20,7 @@ class AccountAdapter(DefaultAccountAdapter):
 
     def save_teacher(self, user, data):
         shift = data.get('shift', 1)
-        employee_id = data.get('emp_id', 1)  
+        employee_id = data.get('emp_id', 1)
         teacher_obj = Teacher(user=user, shift=shift, emp_id=employee_id)
         teacher_obj.save()
     
@@ -59,3 +59,10 @@ class AccountAdapter(DefaultAccountAdapter):
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request: HttpRequest, sociallogin: Any):
         return getattr(settings, "ACCOUNT_ALLOW_REGISTRATION", True)
+
+    def save_user(self, request, sociallogin, form):
+        user = super(SocialAccountAdapter, self).save_user(
+            request, sociallogin, form
+        )
+        user.save()
+        return user

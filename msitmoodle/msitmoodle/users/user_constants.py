@@ -133,9 +133,9 @@ CR = 5
 
 PROFILE_TYPE = (
     (TEACHER, "Teacher"),
-    (PROCTOR, "Proctor"),
-    (HOD, "HOD"),
+    # (PROCTOR, "Proctor"),
+    # (HOD, "HOD"),
     (STUDENT, "Student"),
-    (CR, "Class Representative") 
+    # (CR, "Class Representative") 
 )
 #End Region
