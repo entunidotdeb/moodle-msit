@@ -9,8 +9,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 import datetime
 from .forms import UserUpdateForm
-from .models import Student, Teacher
-from .user_constants import STUDENT, TEACHER
+from .models import Student, Teacher, Course
+from .user_constants import STUDENT, TEACHER, COURSES, YEAR, SEMESTER
+from django.template import loader
 
 User = get_user_model()
 
@@ -66,6 +67,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         form.fields['currentsem'].initial = student.currentsem
         form.fields['serialnum'].initial = student.serialnum
         form.fields['profile_type'].initial = STUDENT
+        del form.fields['shift']
         return form
 
     def post(self, request, *args, **kwargs):
@@ -78,9 +80,13 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
                 updated = self.set_student_details(data)
             elif int(profile_type) == TEACHER:
                 updated = self.set_teacher_details(data)
-        messages.add_message(
-            self.request, messages.INFO, _("Infos successfully updated")
-        )
+            if updated:
+                msg = "Infos successfully updated"
+            else:
+                msg = "Wrong Info provided"
+            messages.add_message(
+                self.request, messages.INFO, _(msg)
+            )
         return redirect(self.get_success_url())
 
     def set_student_details(self, data):
@@ -88,12 +94,54 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         student = user.student
         user.first_name = data.get('first_name', '')
         user.last_name = data.get('last_name', '')
+        course = data.get('course', None)
+        try: 
+            if course:
+                course_db_obj = Course.objects.filter(course_name=int(course))
+                if len(course_db_obj)>0:
+                    course_db_obj_selected = course_db_obj[0]
+                    student.course = course_db_obj_selected
+                else:
+                    #TODO
+                    pass
+        except Exception:
+            #TODO
+            pass
+        enrollnum = data.get('enrollnum', -1)
+        if int(enrollnum) > 0:
+            student.enrollnum = int(enrollnum)
+        section = data.get('section', None)
+        if section:
+            student.section = section
+        currentyear = data.get('currentyear', None)
+        currentsem = data.get('currentsem', None)
+        try:
+            currentyear = int(currentyear)
+            currentsem = int(currentsem)
+            student.currentyear = currentyear
+            student.currentsem = currentsem
+        except:
+            #TODO
+            pass
+        serialnum = data.get('serialnum', None)
+        if serialnum:
+            student.serialnum = serialnum
+        student.save()
+        user.save()          
         return True
 
     def set_teacher_details(self, data):
-        return False
+        user = self.get_object()
+        user.first_name = data.get('first_name', '')
+        user.last_name = data.get('last_name', '')
+        teacher = user.teacher 
+        shift = data.get('shift', None)
+        if shift:
+            teacher.shift = shift
+        user.save()
+        teacher.save()
+        return True
 
-    
     def get_success_url(self):
         return reverse("users:detail", kwargs={"username": self.request.user.username})
 
@@ -124,8 +172,9 @@ user_redirect_view = UserRedirectView.as_view()
 def current_datetime(request, username):
     now = datetime.datetime.now()
     user = User.objects.get(username=username)
-    html = "<html><body><h1>It is now %s %s.</h1></body></html>" % (now, user.email)
-    return HttpResponse(html)
+    template = loader.get_template("account/tryangulr.html")
+    # html = "<html><body><h1>It is now %s %s.</h1></body></html>" % (now, user.email)
+    return HttpResponse(template.render())
 
 
 class UserSettingsView(LoginRequiredMixin, FormView):

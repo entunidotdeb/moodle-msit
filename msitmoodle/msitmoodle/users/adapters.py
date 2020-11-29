@@ -28,8 +28,8 @@ class AccountAdapter(DefaultAccountAdapter):
         enrollnum = data.get('enrollnum', int(0))
         course = data.get('course', int(1))
         serialnum = data.get('serialnum', int(1))
-        course = Course.objects.filter(course_name=course)
-        if len(course) > 0:
+        course = Course.objects.filter(course_name=int(course))
+        if len(course) > 0: 
             course = course[0]
         section = Section.objects.all()[0]
         #TODO do similar for section
