@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from .user_constants import (
     COURSES, YEAR, SEMESTER, SUBJECTS, SUB_TYPE, SHIFT, 
-    FIRSTYR, FIRSTSEM
+    FIRSTYR, FIRSTSEM, REQUESTTYPE, REQ_STATUS
 )
 
 class User(AbstractUser):
@@ -66,8 +66,11 @@ class Subject(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     enrollnum = models.BigIntegerField(verbose_name="Enrollment Number", blank=True, unique=True)
-    course = models.OneToOneField(
+    course = models.ForeignKey(
         to=Course, verbose_name="Course Enrolled", on_delete=models.PROTECT
+    )
+    subject = models.ManyToManyField(
+        to=Subject, verbose_name="Subjects registered",
     )
     section = models.ForeignKey(
         to=Section, on_delete=models.PROTECT, verbose_name="Section"
@@ -91,7 +94,7 @@ class Student(models.Model):
         if self.user.email:
             return '%s' % (self.user.email) 
         if self.enrollnum:
-            return '%s' % (str(enrollnum))
+            return '%s' % (str(self.enrollnum))
 
 
 class Teacher(models.Model):
@@ -100,6 +103,7 @@ class Teacher(models.Model):
     emp_id = models.IntegerField(verbose_name="Employee ID") 
     is_proctor = models.BooleanField(default=False)
     is_hod = models.BooleanField(default=False)
+    subject = models.ForeignKey(to=Subject, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
         if self.user.first_name and self.user.last_name:
@@ -110,5 +114,13 @@ class Teacher(models.Model):
             return '%s' % (self.user.email) 
         if self.name:
             return '%s' % (self.name)
-        
+
+
+class StudentRequest(models.Model):
+    student = models.ForeignKey(to=Student, on_delete=models.CASCADE)
+    teacher = models.ForeignKey(to=Teacher, on_delete=models.CASCADE)
+    reqType = models.SmallIntegerField(choices=REQUESTTYPE, verbose_name="Request Type")
+    status = models.SmallIntegerField(choices=REQ_STATUS, verbose_name="Request status")
+    subject = models.ForeignKey(to=Subject, on_delete=models.CASCADE, null=True, blank=True)
+    
 #TODO  create Batch model

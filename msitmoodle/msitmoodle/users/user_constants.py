@@ -139,3 +139,20 @@ PROFILE_TYPE = (
     # (CR, "Class Representative") 
 )
 #End Region
+
+# Region Request
+
+SUB_APPROVAL = 1
+
+REQUESTTYPE = (
+    (SUB_APPROVAL, "Subject Approval"),
+)
+
+PENDING = 1
+APPROVED = 2
+
+REQ_STATUS = (
+    (PENDING, "Request Pending"),
+    (APPROVED, "Request Approved"),
+)
+#End Region

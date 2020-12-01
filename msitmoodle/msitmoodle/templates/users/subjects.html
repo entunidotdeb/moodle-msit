@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div style="background-color: pink;">
+<h4> Your enrolled subjects are: </h4>
+</div>
+
+{% if enrolled_subjects %}
+{% for sub in enrolled_subjects %}
+<div style="border-bottom: 2px solid yellow;">
+    <span> {{ sub }} </span>
+</div>
+{% endfor %}
+{% endif %}
+
+<div style="background-color: pink;">
+<h4> Your course subjects for this semester are: </h4>
+<h6>Please select courses to request access for:</h6>
+</div>
+
+{% if course_subjects %}
+{% for sub in course_subjects %}
+<div id="{{ sub.id }}" style="border-bottom: 2px solid red; margin-bottom: 2px; cursor: pointer" onClick="Add(this,)">
+    <span id="{{ sub.id }}"> {{ sub }} </span>
+</div>
+{% endfor %}
+
+<div class="form-container">
+    <form action="{% url 'users:subject' request.user.student.pk %}" method="POST">
+        {% csrf_token %}
+        {{ form.data }}
+        <button class="btn btn-primary" type="submit">{% trans "Request Access" %} &raquo;</button>
+    </form>
+</div>
+{% endif %}
+
+<script>
+
+var data = document.getElementById("id_data").value;
+var toReq = [];
+
+function Add(element){
+    var element_id = parseInt(element.getAttribute("id"))
+    var marked_already = false;
+    for (var [index, sub] of toReq.entries()){
+        if (element_id === sub.id){
+            marked_already = true;
+            element.style.backgroundColor = "white";
+            toReq.splice(index, 1);
+        }
+    }
+    if(!marked_already){
+        toReq.push(
+            {
+                'id': element_id,
+
+            }
+        )
+        element.style.backgroundColor = "lightgreen";
+    }
+    var jsonRepr = JSON.stringify(toReq);
+    document.getElementById("id_data").value = jsonRepr;
+}
+</script>
+
+{% endblock  %}

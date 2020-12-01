@@ -1,17 +1,19 @@
+import datetime
+import json
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.views.generic import DetailView, RedirectView, UpdateView
-from django.views.generic.edit import FormView
 from django.contrib import messages
 from django.utils.translation import ugettext_lazy as _
-from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
-import datetime
-from .forms import UserUpdateForm
-from .models import Student, Teacher, Course
-from .user_constants import STUDENT, TEACHER, COURSES, YEAR, SEMESTER
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from django.template import loader
+from .forms import UserUpdateForm, SubjectForm
+from .models import Course
+from .user_constants import STUDENT, TEACHER
+
 
 User = get_user_model()
 
@@ -172,23 +174,52 @@ user_redirect_view = UserRedirectView.as_view()
 def current_datetime(request, username):
     now = datetime.datetime.now()
     user = User.objects.get(username=username)
-    template = loader.get_template("account/tryangulr.html")
+    template = loader.get_template("users/subject_update.html")
     # html = "<html><body><h1>It is now %s %s.</h1></body></html>" % (now, user.email)
     return HttpResponse(template.render())
 
 
-class UserSettingsView(LoginRequiredMixin, FormView):
-    template_name = 'account/user_update.html'
-    form_class = UserUpdateForm
+class UserSubjectsView(LoginRequiredMixin, UpdateView):
+    template_name = 'users/subjects.html'
+    model = User
+    field = ['username']
+    form_class = SubjectForm
 
-    def get(self, request, *args, **kwargs):
-        form_class = self.get_form_class()
+    def get(self, request, **kwargs):
+        form_class = SubjectForm
         form = self.get_form(form_class)
-        user = request.user
-
-        context = self.get_context_data(form=form)
+        self.object = self.get_object()
+        student = getattr(self.object, 'student', None)
+        enrolled_subjects, course_subjects = list(), list()
+        context = dict()
+        if student:
+            enrolled_subjects = student.subject.all()
+            course_subjects = student.course.subject_set.all().filter(
+                sem=student.currentsem
+            )
+        if enrolled_subjects:
+            context.update({'enrolled_subjects': enrolled_subjects})
+        if course_subjects:
+            context.update({'course_subjects': course_subjects})
+        form.fields['data'].initial = "hello world"
+        context.update({'form': form})
         return self.render_to_response(context)
 
 
+    def get_object(self):
+        return User.objects.get(username=self.request.user.username)
+
+
+    def post(self, request, *args, **kwargs):
+        raw_data = request.POST.get('data', '')
+        data = json.loads(raw_data)
+        print(type(data), data)
+        return redirect(self.get_success_url())
+
+
+    def get_success_url(self):
+        return reverse("users:subject", kwargs={"pk": self.request.user.pk})    
+
+user_subject_view = UserSubjectsView.as_view()
 
 # user_update_view = UserSettingsView.as_view()
