@@ -103,7 +103,7 @@ class Teacher(models.Model):
     emp_id = models.IntegerField(verbose_name="Employee ID") 
     is_proctor = models.BooleanField(default=False)
     is_hod = models.BooleanField(default=False)
-    subject = models.ForeignKey(to=Subject, on_delete=models.PROTECT, null=True, blank=True)
+    subject = models.ManyToManyField(to=Subject, verbose_name="Subjects Alloted")
 
     def __str__(self):
         if self.user.first_name and self.user.last_name:

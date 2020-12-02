@@ -27,6 +27,9 @@
     {% if object.student %}
     <a class="btn btn-primary" href="{% url 'users:subject' object.student.pk %}" role="button">My Subjects</a>
     {% endif %}
+    {% if object.teacher %}
+    <a class="btn btn-primary" href="{% url 'users:teacher-request' object.teacher.pk %}" role="button">My Subject's Request</a>
+    {% endif %}
   </div>
 
 </div>

@@ -10,9 +10,9 @@ from django.utils.translation import ugettext_lazy as _
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import loader
-from .forms import UserUpdateForm, SubjectForm
-from .models import Course
-from .user_constants import STUDENT, TEACHER
+from .forms import UserUpdateForm, GeneralForm
+from .models import Course, StudentRequest, Subject, Teacher
+from .user_constants import STUDENT, TEACHER, SUB_APPROVAL, PENDING
 
 
 User = get_user_model()
@@ -183,24 +183,28 @@ class UserSubjectsView(LoginRequiredMixin, UpdateView):
     template_name = 'users/subjects.html'
     model = User
     field = ['username']
-    form_class = SubjectForm
+    form_class = GeneralForm
 
     def get(self, request, **kwargs):
-        form_class = SubjectForm
+        form_class = GeneralForm
         form = self.get_form(form_class)
         self.object = self.get_object()
         student = getattr(self.object, 'student', None)
-        enrolled_subjects, course_subjects = list(), list()
+        enrolled_subjects, course_subjects, pending_subjects_request = list(), list(), list()
         context = dict()
         if student:
             enrolled_subjects = student.subject.all()
             course_subjects = student.course.subject_set.all().filter(
                 sem=student.currentsem
             )
+            pending_subjects_request = student.studentrequest_set.all().filter(status=PENDING)
         if enrolled_subjects:
             context.update({'enrolled_subjects': enrolled_subjects})
         if course_subjects:
             context.update({'course_subjects': course_subjects})
+        if pending_subjects_request:
+            context.update({'pending_subjects_request': pending_subjects_request})
+        #TODO do smthing or remove form
         form.fields['data'].initial = "hello world"
         context.update({'form': form})
         return self.render_to_response(context)
@@ -212,8 +216,47 @@ class UserSubjectsView(LoginRequiredMixin, UpdateView):
 
     def post(self, request, *args, **kwargs):
         raw_data = request.POST.get('data', '')
+        student = request.user.student
         data = json.loads(raw_data)
-        print(type(data), data)
+        all_subjects = Subject.objects.all()
+        all_requests = list()
+        for req in data:
+            request_to_teacher = None
+            req_subject_id = req.get('id', None)
+            req_subject = None
+            if req_subject_id:
+                req_subjects = all_subjects.filter(id=req_subject_id)
+            if req_subjects:
+                req_subject = req_subjects[0]
+            subject_teachers = Teacher.objects.filter(subject__id=req_subject.id)
+            subject_teacher = subject_teachers[0] if subject_teachers else None
+            if subject_teacher:
+                request_to_teacher = subject_teacher
+            else:
+                super_users = User.objects.filter(is_superuser=True)
+                for super_user in super_users:
+                    if getattr(super_user, "teacher", False):
+                        request_to_teacher = super_user.teacher
+                        break
+            if req_subject and student and request_to_teacher:
+                new_req = StudentRequest(
+                    subject=req_subject, student=student, teacher=request_to_teacher, reqType=SUB_APPROVAL, \
+                        status=PENDING
+                )
+                all_requests.append(new_req)
+        if all_requests:
+            StudentRequest.objects.bulk_create(objs=all_requests)
+            msg = list()
+            for req in all_requests:
+                msg.append(
+                    _("Requests Sent Successfully for sub ") + str(req.subject) + \
+                        " to teacher " + str(req.teacher)
+                )
+        else:
+            msg = "Requests Failed."
+        messages.add_message(
+                self.request, messages.INFO, msg
+            )
         return redirect(self.get_success_url())
 
 
@@ -221,5 +264,42 @@ class UserSubjectsView(LoginRequiredMixin, UpdateView):
         return reverse("users:subject", kwargs={"pk": self.request.user.pk})    
 
 user_subject_view = UserSubjectsView.as_view()
+
+
+class TeacherRequest(LoginRequiredMixin, UpdateView):
+    template_name = 'users/subjects_request.html'
+    model = User
+    field = ['username']
+    form_class = GeneralForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.get_form_class())
+        self.object = self.get_object()
+        teacher = getattr(self.object, 'teacher', None)
+        teacher_requests = None
+        subject_wise_requests = list()
+        context = dict()
+        if teacher:
+            teacher_requests = StudentRequest.objects.filter(
+                teacher=teacher, reqType=SUB_APPROVAL, status=PENDING
+            )
+            teacher_subjects = teacher.subject.all()
+        if teacher_subjects and teacher_requests:
+            for subject in teacher_subjects:
+                subject_wise_requests.append(
+                    teacher_requests.filter(subject=subject)
+                )
+            context.update({'teacher_requests': subject_wise_requests, \
+                'teacher_subjects': teacher_subjects})
+        return self.render_to_response(context)
+    
+    def get_object(self):
+        return User.objects.get(username=self.request.user.username)
+
+    def get_success_url(self):
+        return reverse("users:teacher-request", kwargs={"pk": self.request.user.pk})
+
+
+user_requests_view = TeacherRequest.as_view()
 
 # user_update_view = UserSettingsView.as_view()

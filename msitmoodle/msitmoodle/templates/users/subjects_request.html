@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+
+{% if teacher_requests and teacher_subjects %}
+    {% for sub_req in teacher_requests %}
+        {% for req in sub_req %}
+            {% if forloop.first %}
+            <div style="background-color: pink;">
+                <h4> Requests for your subject <b> {{ req.subject }} </b></h4>
+            </div>    
+            {% endif %}
+                <div style="border-bottom: 2px solid red;">    
+                    <span> From student with name {{ req.student }} </span>
+                </div>
+        {% endfor %}
+    {% endfor %}
+
+{% endif %}
+
+<div class="form-container">
+    <form action="{% url 'users:teacher-request' request.user.teacher.pk %}" method="POST">
+        {% csrf_token %}
+        {{ form.data }}
+        <button class="btn btn-primary" type="submit">{% trans "Request Access" %} &raquo;</button>
+    </form>
+</div>
+
+{% endblock content %}

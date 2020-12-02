@@ -90,5 +90,5 @@ class UserUpdateForm(forms.Form):
         choices=PROFILE_TYPE, widget=forms.widgets.HiddenInput, label="Signing up as?",
     )
 
-class SubjectForm(forms.Form):
+class GeneralForm(forms.Form):
     data = forms.CharField(widget=forms.HiddenInput(), required=False)

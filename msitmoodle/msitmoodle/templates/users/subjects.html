@@ -18,23 +18,56 @@
 
 <div style="background-color: pink;">
 <h4> Your course subjects for this semester are: </h4>
-<h6>Please select courses to request access for:</h6>
+<h6>Please select subjects to request access for:</h6>
+<h6>Subjects for which you don't have access are shown in <b>bold text</b></h6>
 </div>
 
 {% if course_subjects %}
-{% for sub in course_subjects %}
-<div id="{{ sub.id }}" style="border-bottom: 2px solid red; margin-bottom: 2px; cursor: pointer" onClick="Add(this,)">
-    <span id="{{ sub.id }}"> {{ sub }} </span>
-</div>
-{% endfor %}
+    {% for sub in course_subjects %}
+        {% if sub.teacher_set.all %}
+            {% for teacher in sub.teacher_set.all %}
+                <div id="{{ sub.id }}" tid="{{ teacher.id }}" style="border-bottom: 2px solid red; margin-bottom: 2px; cursor: pointer" onClick="Add(this,)">
+                    {% if not enrolled_subjects or sub not in enrolled_subjects %}
+                        <span id="{{ sub.id }}"> <b> {{ sub }} </b></span>
+                    {% else %}
+                        <span id="{{ sub.id }}">{{ sub }}</span>
+                    {%  endif %}
+                    <span style="float: right;"  id="{{ sub.id }}"> Subject Teacher is Mr/Ms {{ teacher }}</span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div id="{{ sub.id }}" style="border-bottom: 2px solid red; margin-bottom: 2px; cursor: pointer" onClick="Add(this,)">
+                {% if not enrolled_subjects or sub not in enrolled_subjects %}
+                    <span id="{{ sub.id }}"> <b> {{ sub }} </b></span>
+                {% else %}
+                    <span id="{{ sub.id }}">{{ sub }}</span>
+                {%  endif %}
+                <span style="float: right;"  id="{{ sub.id }}"> Subject Teacher is not alloted yet.</span>
+            </div>
+        {% endif %}
 
-<div class="form-container">
-    <form action="{% url 'users:subject' request.user.student.pk %}" method="POST">
-        {% csrf_token %}
-        {{ form.data }}
-        <button class="btn btn-primary" type="submit">{% trans "Request Access" %} &raquo;</button>
-    </form>
+    {% endfor %}
+
+    <div class="form-container">
+        <form action="{% url 'users:subject' request.user.student.pk %}" method="POST">
+            {% csrf_token %}
+            {{ form.data }}
+            <button class="btn btn-primary" type="submit">{% trans "Request Access" %} &raquo;</button>
+        </form>
+    </div>
+{% endif %}
+
+<div style="background-color: pink;">
+    <h4> Your pending subject requests: </h4>
+    <h6> Please wait for subject teacher to approve. </h6>
 </div>
+{% if pending_subjects_request %}
+    {% for req in pending_subjects_request %}
+    <div style="border-bottom: 2px solid rgb(65, 112, 65)">
+        <span>{{ req.subject }}</span>
+        <span style="float: right;">Subject teacher is {{ req.teacher }}</span>
+    </div>
+    {% endfor %}
 {% endif %}
 
 <script>
@@ -44,6 +77,7 @@ var toReq = [];
 
 function Add(element){
     var element_id = parseInt(element.getAttribute("id"))
+    var element_tid = parseInt(element.getAttribute("tid"))
     var marked_already = false;
     for (var [index, sub] of toReq.entries()){
         if (element_id === sub.id){
@@ -53,12 +87,22 @@ function Add(element){
         }
     }
     if(!marked_already){
-        toReq.push(
+        if (element_tid){
+            toReq.push(
+            {
+                'id': element_id,
+                'teacher_id': element_tid,
+            }
+        )    
+        }
+        else{
+            toReq.push(
             {
                 'id': element_id,
 
             }
         )
+        }
         element.style.backgroundColor = "lightgreen";
     }
     var jsonRepr = JSON.stringify(toReq);
