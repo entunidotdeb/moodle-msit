@@ -12,7 +12,7 @@ from django.shortcuts import redirect, render
 from django.template import loader
 from .forms import UserUpdateForm, GeneralForm
 from .models import Course, StudentRequest, Subject, Teacher
-from .user_constants import STUDENT, TEACHER, SUB_APPROVAL, PENDING
+from .user_constants import STUDENT, TEACHER, SUB_APPROVAL, PENDING, APPROVED
 
 
 User = get_user_model()
@@ -274,11 +274,13 @@ class TeacherRequest(LoginRequiredMixin, UpdateView):
 
     def get(self, request, *args, **kwargs):
         form = self.get_form(self.get_form_class())
+        context = dict()
+        if form:
+            context.update({'form': form})
         self.object = self.get_object()
         teacher = getattr(self.object, 'teacher', None)
         teacher_requests = None
         subject_wise_requests = list()
-        context = dict()
         if teacher:
             teacher_requests = StudentRequest.objects.filter(
                 teacher=teacher, reqType=SUB_APPROVAL, status=PENDING
@@ -292,7 +294,25 @@ class TeacherRequest(LoginRequiredMixin, UpdateView):
             context.update({'teacher_requests': subject_wise_requests, \
                 'teacher_subjects': teacher_subjects})
         return self.render_to_response(context)
-    
+
+    def post(self, request, *args, **kwargs):
+        raw_data = request.POST.get('data', '')
+        requests_to_approve = json.loads(raw_data)
+        msg = ''
+        for req in requests_to_approve:
+            req_id = req.get('req_id', None)
+            if req_id:
+                req_obj = StudentRequest.objects.filter(id=req_id)
+                req_obj = req_obj[0]
+                student = req_obj.student
+                subject = req_obj.subject
+                student.subject.add(subject)
+                req_obj.status = APPROVED
+                req_obj.save()
+                msg = msg + ", " + str(student)     
+        messages.add_message(self.request, messages.INFO, "Requests of following users has been approved " + msg)
+        return redirect(self.get_success_url())
+
     def get_object(self):
         return User.objects.get(username=self.request.user.username)
 

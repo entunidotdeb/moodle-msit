@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils.html import format_html
 
 from msitmoodle.users.forms import UserChangeForm, UserCreationForm
-from .models import Course, Section, Subject, Student, Teacher
+from .models import Course, Section, Subject, Student, Teacher, StudentRequest
 
 User = get_user_model()
 
@@ -67,4 +67,5 @@ class TeacherAdmin(admin.ModelAdmin):
     
     def email(self, obj):
         return obj.user.email
-    
+
+admin.site.register(StudentRequest)

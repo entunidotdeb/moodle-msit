@@ -122,5 +122,9 @@ class StudentRequest(models.Model):
     reqType = models.SmallIntegerField(choices=REQUESTTYPE, verbose_name="Request Type")
     status = models.SmallIntegerField(choices=REQ_STATUS, verbose_name="Request status")
     subject = models.ForeignKey(to=Subject, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        if self.student and self.subject:
+            return '%s' % (str(self.student) + "  "  + str(self.subject))
     
 #TODO  create Batch model
