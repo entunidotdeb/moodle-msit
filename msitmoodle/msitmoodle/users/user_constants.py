@@ -111,7 +111,7 @@ SUB_TYPE = (
 
 #End region
 
-#Region Shifts
+#Region Shifts, Section, Groups
 
 MOR = 1
 EVE = 2
@@ -119,6 +119,22 @@ EVE = 2
 SHIFT = (
     (MOR, "Morning"),
     (EVE, "Evening")
+)
+
+SECTION1 = 1
+SECTION2 = 2
+SECTION3 = 3
+SECTION4 = 4
+SECTION5 = 5
+SECTION6 = 6
+
+SECTIONS = (
+    (SECTION1, "Section I"),
+    (SECTION2, "Section II"),
+    (SECTION3, "Section III"),
+    (SECTION4, "Section IV"),
+    (SECTION5, "Section V"),
+    (SECTION6, "Section VI"),
 )
 
 #End Region
@@ -156,3 +172,19 @@ REQ_STATUS = (
     (APPROVED, "Request Approved"),
 )
 #End Region
+
+#Region FeedBackQuestion Answer's choice
+MCQ = 1
+QTEXT = 2
+RATING = 3
+QYN = 4
+TF = 5
+
+QUES_TYPE = (
+    (MCQ, "MCQ Answer"),
+    (QTEXT, "Text Answer"),
+    (RATING, "Rate Scale Answer"),
+    (QYN, "Yes/No Answer"),
+    (TF, "True/False Answer"),
+)
+#EndRegion

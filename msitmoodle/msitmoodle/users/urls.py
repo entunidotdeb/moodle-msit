@@ -7,6 +7,7 @@ from msitmoodle.users.views import (
     user_detail_view,
     user_subject_view,
     user_requests_view,
+    feedback_view,
 )
 
 app_name = "users"
@@ -15,5 +16,6 @@ urlpatterns = [
     path("~update/", view=user_update_view, name="update"),
     path("~subject/<int:pk>/", view=user_subject_view, name="subject"),
     path("~requests/<int:pk>/", view=user_requests_view, name="teacher-request"),
+    path("~feedback/<int:pk>/", view=feedback_view, name="feedback"),
     path("<str:username>/", view=user_detail_view, name="detail"),
 ]

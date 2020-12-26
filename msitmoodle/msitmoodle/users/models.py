@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 from .user_constants import (
     COURSES, YEAR, SEMESTER, SUBJECTS, SUB_TYPE, SHIFT, 
-    FIRSTYR, FIRSTSEM, REQUESTTYPE, REQ_STATUS
+    FIRSTYR, FIRSTSEM, REQUESTTYPE, REQ_STATUS, QUES_TYPE
 )
 
 class User(AbstractUser):
@@ -100,10 +100,12 @@ class Student(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE)
     shift = models.SmallIntegerField(choices=SHIFT, verbose_name="Shift")
-    emp_id = models.IntegerField(verbose_name="Employee ID") 
+    emp_id = models.IntegerField(verbose_name="Employee ID")
     is_proctor = models.BooleanField(default=False)
     is_hod = models.BooleanField(default=False)
-    subject = models.ManyToManyField(to=Subject, verbose_name="Subjects Alloted")
+    subject = models.ManyToManyField(
+        to=Subject, verbose_name="Subjects Alloted", related_name="teacher"
+    )
 
     def __str__(self):
         if self.user.first_name and self.user.last_name:
@@ -127,4 +129,50 @@ class StudentRequest(models.Model):
         if self.student and self.subject:
             return '%s' % (str(self.student) + "  "  + str(self.subject))
     
+
+class FeedbackForm(models.Model):
+    subject = models.OneToOneField(to=Subject, on_delete=models.CASCADE)
+    is_active = models.BooleanField(verbose_name="Active?")
+
+    def __str__(self):
+        return "FeedBackForm: " + str(self.subject)
+
+
+class Choice(models.Model):
+    choice_text = models.CharField(max_length=30, null=True, blank=True)
+    choice_val = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return "Choice: " + (self.choice_text or str(self.choice_val))
+
+
+class Question(models.Model):
+    feedback = models.ForeignKey(
+        to=FeedbackForm, on_delete=models.CASCADE, related_name="questions"
+    )
+    ques_text = models.CharField(verbose_name="Question Text", blank=False, max_length=200)
+    description = models.CharField(verbose_name="Desc of question", blank=True, max_length=200)
+    ques_type = models.SmallIntegerField(choices=QUES_TYPE, verbose_name="Question Type")
+    choices = models.ManyToManyField(Choice, related_name="in_questions")
+    right_choice = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True, null=True)
+
+    def __str__(self):
+        return str(self.ques_text)
+
+
+class StudentQA(models.Model):
+    question = models.ForeignKey(to=Question, on_delete=models.CASCADE)
+    choice = models.ForeignKey(to=Choice, null=True, blank=True,\
+         on_delete=models.PROTECT)
+    student = models.ForeignKey(to=Student, on_delete=models.CASCADE)
+    answered_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.student) + " answered " + str(self.choice) + " for " + str(self.question) 
+    
+    class Meta:
+        verbose_name = "Student's QA"
+    
+
 #TODO  create Batch model
+

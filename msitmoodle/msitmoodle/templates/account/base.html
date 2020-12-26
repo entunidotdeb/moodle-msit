@@ -3,9 +3,14 @@
 
 {% block content %}
 {% block outer %} {% endblock %}
-<div class="row">
-  <div class="col-md-6 offset-md-3">
+<div class="row" style="margin-top: 10px; background-color: #bb2205; border-radius: 5px;">
+  <div class="col-md-6 offset-md-3" style="background-color: #f8f9fa; border-radius: 5px;">
     {% block inner %}{% endblock %}
+  </div>
+  <div class="col-md-6 offset-md-3">
+    <div>
+      <p>Hello</p>
+    </div>
   </div>
 </div>
 {% endblock %}

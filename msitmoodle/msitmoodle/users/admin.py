@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from django.utils.html import format_html
 
 from msitmoodle.users.forms import UserChangeForm, UserCreationForm
-from .models import Course, Section, Subject, Student, Teacher, StudentRequest
+from .models import Course, Section, Subject, Student, Teacher, StudentRequest, FeedbackForm,\
+     Question, StudentQA, Choice
 
 User = get_user_model()
 
@@ -44,7 +45,7 @@ class SectionAdmin(admin.ModelAdmin):
 class SubjectAdmin(admin.ModelAdmin):
     search_fields = ("name__startswith",)
     list_filter = ("year", "sem", "courses", "type")
-    filter_horizontal = ()
+    filter_horizontal = ('courses',)
     
 
 @admin.register(Student)
@@ -52,6 +53,7 @@ class StudentAdmin(admin.ModelAdmin):
     search_fields = ("enrollnum",)
     list_display = ("name", "enrollnum")
     list_filter = ("course", "currentyear", "is_cr")
+    filter_horizontal = ('subject',)
 
     def name(self, obj):
         return obj
@@ -61,6 +63,7 @@ class TeacherAdmin(admin.ModelAdmin):
     search_fields = ("user",)
     list_display = ("name", "email", )
     list_filter = ("shift",)
+    filter_horizontal = ('subject',)
 
     def name(self, obj):
         return obj
@@ -68,4 +71,16 @@ class TeacherAdmin(admin.ModelAdmin):
     def email(self, obj):
         return obj.user.email
 
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    filter_horizontal = ('choices',)
+
+@admin.register(StudentQA)
+class StudentQAAdmin(admin.ModelAdmin):
+    list_filter = ("student",)
+    search_fields = ("student",)
+
 admin.site.register(StudentRequest)
+admin.site.register(FeedbackForm)
+admin.site.register(Choice)

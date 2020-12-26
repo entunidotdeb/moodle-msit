@@ -11,7 +11,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import loader
 from .forms import UserUpdateForm, GeneralForm
-from .models import Course, StudentRequest, Subject, Teacher
+from .models import Course, StudentRequest, Subject, Teacher, FeedbackForm, StudentQA
 from .user_constants import STUDENT, TEACHER, SUB_APPROVAL, PENDING, APPROVED
 
 
@@ -180,7 +180,7 @@ def current_datetime(request, username):
 
 
 class UserSubjectsView(LoginRequiredMixin, UpdateView):
-    template_name = 'users/subjects.html'
+    template_name = 'users/mysubjects.html'
     model = User
     field = ['username']
     form_class = GeneralForm
@@ -267,7 +267,7 @@ user_subject_view = UserSubjectsView.as_view()
 
 
 class TeacherRequest(LoginRequiredMixin, UpdateView):
-    template_name = 'users/subjects_request.html'
+    template_name = 'users/myrequest.html'
     model = User
     field = ['username']
     form_class = GeneralForm
@@ -319,7 +319,70 @@ class TeacherRequest(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("users:teacher-request", kwargs={"pk": self.request.user.pk})
 
-
 user_requests_view = TeacherRequest.as_view()
 
+
+class SubjectView(LoginRequiredMixin, UpdateView):
+    template_name = 'users/subject.html'
+    model = User
+    field = ['username']
+    form_class = GeneralForm
+    
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.get_form_class())
+        context = dict()
+        self.object = self.get_object()
+        return self.render_to_response(context)
+
 # user_update_view = UserSettingsView.as_view()
+
+
+class FillFeedback(LoginRequiredMixin, UpdateView):
+    template_name = 'users/feedback.html'
+    model = User
+    field = ['username']
+    form_class = GeneralForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.get_form(self.get_form_class())
+        context = dict()
+        self.object = self.get_object()
+        student = getattr(self.object, "student", None)
+        if not student:
+            return self.render_to_response(context)
+        subjects = student.subject.all()
+        data = list()
+        for subject in subjects:
+            feedback = subject.feedbackform
+            if feedback.is_active:
+                feedback_questions = feedback.questions.all()
+                data.append(
+                    {
+                        "subject": {
+                            "id": subject.id,
+                            "name": str(subject),
+                            "teacher": [
+                                {
+                                    "id": teacher.id, "name": str(teacher)
+                                } for teacher in subject.teacher.all()
+                            ],
+                        },
+                        "question": [
+                            {   "id": question.id, "desc": question.description,
+                                "qtext": question.ques_text,
+                                "qtype": question.ques_type,
+                                "choices": [
+                                    {
+                                        "id": choice.id,
+                                        "choice_text": choice.choice_text,
+                                        "choice_val": choice.choice_val,
+                                    } for choice in question.choices.all()
+                                ],
+                            } for question in feedback_questions
+                        ]
+
+                    }
+                )
+        return self.render_to_response({"data": data})
+
+feedback_view = FillFeedback.as_view()

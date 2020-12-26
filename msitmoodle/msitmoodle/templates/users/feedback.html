@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% if request.user.student %}
+<table class="table table-striped table-dark">
+    <thead>
+        <tr>
+            <th colspan="2" style="background-color: #fcf8ec; border-top: 1px solid #fcf8ec; text-align: center;">
+                <span style="color: black;">
+                    Feedback Forms
+                </span>
+            </th>
+            <th colspan={{ data|length }} style="text-align: center;" >Subjects</th>
+        </tr>
+        <tr>
+            <th colspan="2" style="background-color: rgba(255, 136, 0, 0.856); text-align: center;">
+                Questions
+            </th>
+            {% for subject_data in data %}
+            <th id={{ subject_data.subject.id }} style="border-left: 1px rgba(24, 248, 4, 0);">
+                <span> {{ subject_data.subject.name }} by 
+                    <span style="background-color: yellow; color: black; padding: 2px;">
+                        {{ subject_data.subject.teacher.0.name }}
+                    </span>
+                </span>
+            </th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for ques in data.0.question %}
+        <tr id={{ ques.id }}>
+            <th style="background-color: rgba(255, 136, 0, 0.856)">
+                {{ forloop.counter }}
+            </th>
+            <th style="background-color: rgba(255, 136, 0, 0.856)">
+                <span id={{ ques.id }}>
+                    {{ ques.qtext }}
+                </span>
+            </th>
+            {% for sub in data %}
+            <th style="text-align: center;">
+                <label for="rate">Slide to Rate </label>
+                <datalist id="tickmarks" style="display: none;">
+                    {% for choice in ques.choices %}
+                    <option value={{ choice.choice_val }} label={{ choice.choice_val }}></option>
+                    {% endfor %}
+                </datalist>
+                <input type="range" min="1" max={{ ques.choices|length }} name="rate" list="tickmarks" style="margin: 5px;"> 
+            </th>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+{% else %}
+
+<h1> Nothing to see here </h1>
+
+{% endif %}
+
+
+{% endblock content %}
