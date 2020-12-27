@@ -128,14 +128,6 @@ class StudentRequest(models.Model):
     def __str__(self):
         if self.student and self.subject:
             return '%s' % (str(self.student) + "  "  + str(self.subject))
-    
-
-class FeedbackForm(models.Model):
-    subject = models.OneToOneField(to=Subject, on_delete=models.CASCADE)
-    is_active = models.BooleanField(verbose_name="Active?")
-
-    def __str__(self):
-        return "FeedBackForm: " + str(self.subject)
 
 
 class Choice(models.Model):
@@ -147,9 +139,6 @@ class Choice(models.Model):
 
 
 class Question(models.Model):
-    feedback = models.ForeignKey(
-        to=FeedbackForm, on_delete=models.CASCADE, related_name="questions"
-    )
     ques_text = models.CharField(verbose_name="Question Text", blank=False, max_length=200)
     description = models.CharField(verbose_name="Desc of question", blank=True, max_length=200)
     ques_type = models.SmallIntegerField(choices=QUES_TYPE, verbose_name="Question Type")
@@ -172,7 +161,16 @@ class StudentQA(models.Model):
     
     class Meta:
         verbose_name = "Student's QA"
-    
+
+
+class FeedbackForm(models.Model):
+    subject = models.OneToOneField(to=Subject, on_delete=models.CASCADE)
+    is_active = models.BooleanField(verbose_name="Active?")
+    questions = models.ManyToManyField(Question)
+
+    def __str__(self):
+        return "FeedBackForm: " + str(self.subject)
+
 
 #TODO  create Batch model
 

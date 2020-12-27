@@ -4,7 +4,7 @@ from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.conf import settings
 from django.http import HttpRequest
-from msitmoodle.users.models import Teacher, Course
+from msitmoodle.users.models import Teacher, Course, Section, Student
 from .user_constants import (
     TEACHER,
     PROCTOR,
