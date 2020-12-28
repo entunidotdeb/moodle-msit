@@ -6,17 +6,19 @@
 
 {% block css %}
 {{block.super}}
-<link rel="stylesheet" href="{% static 'css/signupstyle.css' %}"> 
+<link rel="stylesheet" href="{% static 'css/signupstyle.css' %}">
 {% endblock %}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
 {% block inner %}
-<h1>{% trans "Sign Up" %}</h1>
+<h1 style="color: white;">{% trans "Sign Up" %}</h1>
 
-<p>{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}">sign in</a>.{% endblocktrans %}</p>
+<p style="color: white;">{% blocktrans %}Already have an account? Then please <a href="{{ login_url }}"
+    class="rounded-pill btn btn-danger">sign
+    in</a>{% endblocktrans %}</p>
 
-<form class="signup blueForms" id="signup_form" method="post" action="{% url 'account_signup' %}">
+<form style="color: white;" class="signup blueForms" id="signup_form" method="post" action="{% url 'account_signup' %}">
   {% csrf_token %}
   <div class="form-row">
     <div class="col-md-4">
@@ -25,7 +27,7 @@
       </button>
     </div>
     <div class="col-md-4">
-      <button class="rounded-pill btn btn-primary" id="signUp_Student">
+      <button class="rounded-pill btn btn-dark" id="signUp_Student">
         Sign Up As Student
       </button>
     </div>
@@ -79,7 +81,7 @@
   {% if redirect_field_value %}
   <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
   {% endif %}
-  <button class="btn btn-primary" type="submit">{% trans "Sign Up" %} &raquo;</button>
+  <button class="btn btn-warning" type="submit">{% trans "Sign Up" %} &raquo;</button>
 </form>
 <script>
   const signUp_Teacher = document.getElementById("signUp_Teacher");
@@ -103,7 +105,7 @@
     div_id_shift.style.display = "none";
     div_id_section.style.display = "none";
     signUp_Student.style.border = "50%";
-    signUp_Teacher.className = " rounded-pill btn btn-primary";
+    signUp_Teacher.className = " rounded-pill btn btn-dark";
     signUp_Student.className = " rounded-pill btn btn-secondary";
     teacher_checkbox.checked = true;
     student_checkbox.checked = false;
@@ -115,11 +117,10 @@
     div_id_course.style.display = "block";
     div_id_shift.style.display = "block";
     div_id_section.style.display = "block";
-    signUp_Student.className = "rounded-pill btn btn-primary";
+    signUp_Student.className = "rounded-pill btn btn-dark";
     signUp_Teacher.className = "rounded-pill btn btn-secondary";
     teacher_checkbox.checked = false;
     student_checkbox.checked = true;
   });
 </script>
 {% endblock %}
-

@@ -100,7 +100,7 @@ class Student(models.Model):
 class Teacher(models.Model):
     user = models.OneToOneField(to=User, on_delete=models.CASCADE)
     shift = models.SmallIntegerField(choices=SHIFT, verbose_name="Shift")
-    emp_id = models.IntegerField(verbose_name="Employee ID")
+    emp_id = models.IntegerField(verbose_name="Employee ID", null=True,blank=True)
     is_proctor = models.BooleanField(default=False)
     is_hod = models.BooleanField(default=False)
     subject = models.ManyToManyField(
